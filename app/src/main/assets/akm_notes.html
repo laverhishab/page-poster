@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="bn"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Page Post</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:sans-serif;background:#f0f2f5;color:#1c1e21}
+header{background:#1877f2;color:#fff;padding:14px 16px;font-size:18px;font-weight:bold;display:flex;justify-content:space-between;align-items:center}
+header button{background:none;border:0;color:#fff;font-size:20px;margin-left:8px}
+main{padding:12px}.card{background:#fff;border-radius:10px;padding:12px;margin-bottom:12px;box-shadow:0 1px 2px #0002}
+textarea,input,select{width:100%;padding:10px;border:1px solid #ccd0d5;border-radius:8px;font-size:16px;margin-top:6px}
+textarea{min-height:110px}input[type=checkbox]{width:auto;margin-right:6px}
+button.b{background:#1877f2;color:#fff;border:0;border-radius:8px;padding:10px 14px;font-size:15px;margin:8px 6px 0 0}
+button.g{background:#e4e6eb;color:#1c1e21}button.r{background:#e41e3f}button:disabled{opacity:.5}
+.note{border-bottom:1px solid #eee;padding:10px 0}.note:last-child{border:0}
+.note p{margin:0 0 6px;white-space:pre-wrap}.small{font-size:12px;color:#65676b;margin-top:4px}
+.th img{height:70px;border-radius:6px;margin:0 4px 4px 0}
+.pv{position:relative;display:inline-block;margin:6px 6px 0 0}.pv img{height:70px;border-radius:6px}.pv b{position:absolute;top:2px;right:2px;background:#000a;color:#fff;border-radius:50%;width:20px;height:20px;text-align:center;font-size:12px;line-height:20px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+#msg{position:fixed;bottom:12px;left:12px;right:12px;background:#333;color:#fff;padding:12px;border-radius:8px;display:none;z-index:9}
+.hide{display:none}
+</style></head><body>
+<header><span>📝 Page Post</span><span><button onclick="openFb()">🌐</button><button onclick="toggle('settings')">⚙️</button></span></header>
+<main>
+<div id="settings" class="card hide">
+<b>সেটিংস</b> <span class="small">(সংস্করণ 2.7)</span>
+<p class="small">১) Facebook App ID দিয়ে লগইন করলে টোকেন নিজেই আসবে ও সেভ থাকবে। অথবা Graph API Explorer-এর টোকেন নিচে বসান। (পারমিশন: pages_show_list, pages_manage_posts)</p>
+<input id="appid" placeholder="Facebook App ID">
+<input id="secret" type="password" placeholder="App Secret (ঐচ্ছিক — টোকেন ৬০ দিনের লম্বা মেয়াদি করতে)">
+<button class="b" onclick="fbLogin()">🔵 Facebook দিয়ে লগইন</button>
+<input id="utoken" type="password" placeholder="User Access Token">
+<button class="b" onclick="saveCfg();toast('টোকেন সেভ হয়েছে')">💾 টোকেন সেভ</button>
+<button class="b g" onclick="loadPages()">পেজ লোড করুন</button>
+<div id="pcount" class="small"></div>
+<hr style="border:0;border-top:1px solid #eee;margin:12px 0">
+<b>🤖 AI সেটিংস</b>
+<select id="aiprov"><option value="gemini">Google Gemini</option><option value="claude">Claude (Anthropic)</option></select>
+<input id="aimodel" placeholder="মডেল (খালি রাখলে ডিফল্ট)">
+<input id="aikey" type="password" placeholder="AI API Key">
+<button class="b" onclick="saveCfg();toast('সেটিংস সেভ হয়েছে')">💾 সেটিংস সেভ</button>
+</div>
+
+<div class="card">
+<b id="etitle">নতুন পোস্ট</b>
+<textarea id="text" placeholder="ক্যাপশন / পোস্ট লিখুন..."></textarea>
+<input id="img" type="file" accept="image/*" multiple onchange="pickImg(this.files)">
+<div class="small" id="imgname"></div><div id="prev"></div>
+<input id="when" type="datetime-local">
+<div class="small">সময় দিলে ফেসবুকে ঠিক সময়ে অটো পোস্ট হবে (অ্যাপ বন্ধ থাকলেও)। কমপক্ষে ১০ মিনিট পরের সময় দিন।</div>
+<button class="b" onclick="savePost()">💾 সেভ</button>
+<button class="b" onclick="saveSched()">⏰ সেভ + শিডিউল</button>
+<button class="b g" onclick="clearEditor()">নতুন</button>
+</div>
+
+<div class="card">
+<b>পেজ সিলেক্ট করুন</b>
+<select id="page"></select>
+<div class="small">পোস্ট/শিডিউল এই পেজে যাবে</div>
+</div>
+
+<div class="card">
+<b>🤖 AI দিয়ে একবারে অনেক পোস্ট</b>
+<textarea id="aitopic" style="min-height:70px" placeholder="বিষয়/নির্দেশনা, যেমন: ফিটনেস টিপস, প্রতিদিন ছোট অনুপ্রেরণামূলক পোস্ট"></textarea>
+<div class="row"><input id="ainum" type="number" min="1" max="14" value="3" placeholder="কয়টি"><input id="aigap" type="number" min="1" value="24" placeholder="ঘণ্টা পরপর"></div>
+<input id="aistart" type="datetime-local">
+<div class="small">কয়টি পোস্ট · কত ঘণ্টা পরপর · প্রথম পোস্টের সময়</div>
+<label class="small" style="display:block;margin-top:8px"><input type="checkbox" id="aiauto" checked>তৈরি হলেই ফেসবুকে অটো শিডিউল করুন</label>
+<button class="b" id="aibtn" onclick="aiGen()">🤖 AI দিয়ে পোস্ট বানান</button>
+</div>
+
+<div class="card">
+<b>🔁 রোজ অটো পোস্ট (অ্যাপ বন্ধ থাকলেও)</b>
+<textarea id="autotopic" style="min-height:70px" placeholder="বিষয়, যেমন: ফিটনেস টিপস, প্রতিদিন একটি ছোট অনুপ্রেরণামূলক পোস্ট"></textarea>
+<input id="autotime" type="time" value="09:00">
+<div class="small">রোজ এই সময়ে AI নতুন পোস্ট লিখে সিলেক্ট করা পেজে দেবে। ফোন নিজেই ~৬ ঘণ্টা পরপর আগামী ৩ দিনের পোস্ট শিডিউল করে রাখে।</div>
+<div class="small" id="autost" style="white-space:pre-wrap"></div>
+<button class="b" onclick="autoOn()">▶️ চালু করুন</button>
+<button class="b r" onclick="autoOff()">⏹ বন্ধ করুন</button>
+</div>
+
+<div class="card"><b>📅 সব ড্রাফট একসাথে শিডিউল</b>
+<div class="row"><input id="bgap" type="number" min="1" value="24"><input id="bstart" type="datetime-local"></div>
+<div class="small">ঘণ্টা পরপর · প্রথম পোস্টের সময়। যে ড্রাফটে নিজের সময় দেওয়া আছে তার সময় বদলাবে না; বাকিগুলো এই সময় থেকে পরপর বসবে।</div>
+<button class="b" id="bbtn" onclick="bulk()">📅 সব ড্রাফট শিডিউল করুন</button></div>
+
+<div class="card"><b>আমার পোস্ট</b><div id="list"></div></div>
+</main>
+<div id="msg"></div>
+<script>
+var G='https://graph.facebook.com/v21.0';
+function $(i){return document.getElementById(i)}
+function enc(s){return encodeURIComponent(s)}
+function toast(t){var m=$('msg');m.textContent=t;m.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(function(){m.style.display='none'},4000)}
+function ls(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function st(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){toast('জায়গা শেষ! পুরনো পোস্ট বা ছবি মুছুন');return false}}
+function toggle(id){$(id).classList.toggle('hide')}
+function esc(s){return String(s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
+function loc(ms){return new Date(ms-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,16)}
+var cfg=ls('cfg',{}),pages=ls('pages',[]),posts=ls('posts',null),editId=null,imgData=[];
+if(!posts){posts=ls('notes',[]).map(function(n){return{id:n.id,t:n.t,text:n.text,img:'',when:0,status:n.posted?'posted':'draft'}});
+ ls('sched',[]).forEach(function(x){posts.push({id:x.id,t:x.id,text:x.text,img:'',when:x.when*1000,status:'scheduled',page:x.page})});st('posts',posts)}
+function byId(id){return posts.filter(function(x){return x.id===id})[0]}
+function saveCfg(){cfg.appId=$('appid').value.trim();cfg.secret=$('secret').value.trim();cfg.utoken=$('utoken').value.trim();
+ cfg.autotopic=$('autotopic').value.trim();cfg.autotime=$('autotime').value;cfg.aiprov=$('aiprov').value;cfg.aimodel=$('aimodel').value.trim();cfg.aikey=$('aikey').value.trim();st('cfg',cfg)}
+function fillCfg(){$('appid').value=cfg.appId||'';$('secret').value=cfg.secret||'';$('utoken').value=cfg.utoken||'';
+ $('autotopic').value=cfg.autotopic||'';$('autotime').value=cfg.autotime||'09:00';$('aiprov').value=cfg.aiprov||'gemini';$('aimodel').value=cfg.aimodel||'';$('aikey').value=cfg.aikey||''}
+var DB=null;
+function idb(){return new Promise(function(ok,no){if(DB)return ok(DB);try{var r=indexedDB.open('pn',1);r.onupgradeneeded=function(){r.result.createObjectStore('i')};r.onsuccess=function(){DB=r.result;ok(DB)};r.onerror=no}catch(e){no(e)}})}
+function iput(k,v){return idb().then(function(d){return new Promise(function(ok,no){var t=d.transaction('i','readwrite');t.objectStore('i').put(v,k);t.oncomplete=ok;t.onerror=no})}).catch(function(){st('img'+k,v)})}
+function iget(k){return idb().then(function(d){return new Promise(function(ok,no){var r=d.transaction('i').objectStore('i').get(k);r.onsuccess=function(){ok(r.result||ls('img'+k,[]))};r.onerror=no})}).catch(function(){return ls('img'+k,[])})}
+function idel(k){try{localStorage.removeItem('img'+k)}catch(e){}return idb().then(function(d){d.transaction('i','readwrite').objectStore('i').delete(k)}).catch(function(){})}
+function render(){
+ var l=$('list');l.innerHTML=posts.length?'':'<div class="small">কোনো পোস্ট নেই</div>';
+ posts.slice().sort(function(a,b){return b.t-a.t}).forEach(function(x){
+  var d=document.createElement('div');d.className='note';
+  var s={draft:'📝 ড্রাফট',scheduled:(x.when&&x.when<Date.now()?'✅ সময় পার, ফেসবুকে প্রকাশিত':'⏰ FB-তে শিডিউল হয়েছে'),posted:'✅ পোস্ট হয়েছে'}[x.status];
+  d.innerHTML=(x.n?'<div class="th" id="t'+x.id+'"></div>':'')+'<p>'+esc(x.text||'(শুধু ছবি)')+'</p><div class="small">'+s+(x.when?' · 🕒 '+new Date(x.when).toLocaleString():'')+(x.page?' · 📄 '+esc(x.page):'')+(x.n?' · 📷 '+x.n:'')+'</div>'+
+  (x.err?'<div class="small" style="color:#e41e3f">⚠️ '+esc(x.err)+'</div>':'')+
+  (x.status==='draft'?'<button class="b" onclick="fbSend(byId('+x.id+'),false)">🚀 এখনই</button><button class="b" onclick="fbSend(byId('+x.id+'),true)">⏰ শিডিউল</button><button class="b g" onclick="editPost('+x.id+')">✏️ এডিট</button>':'<button class="b g" onclick="dupPost('+x.id+')">🔁 কপি করে আবার শিডিউল</button>')+
+  '<button class="b r" onclick="delPost('+x.id+')">🗑</button>';
+  l.appendChild(d);
+  if(x.n)iget(x.id).then(function(a){var c=document.getElementById('t'+x.id);if(c)c.innerHTML=a.slice(0,4).map(function(u){return'<img src="'+u+'">'}).join('')+(a.length>4?'<span class="small"> +'+(a.length-4)+'</span>':'')})});
+ var s=$('page');s.innerHTML='';
+ if(!pages.length)s.innerHTML='<option value="">আগে সেটিংসে পেজ লোড করুন</option>';
+ pages.forEach(function(p,i){var o=document.createElement('option');o.value=i;o.textContent=p.name;s.appendChild(o)});
+ var sel=ls('selpage',0);if(pages[sel])s.value=sel;
+ $('pcount').textContent=pages.length?pages.length+'টি পেজ সেভ আছে':'';
+}
+$('page').onchange=function(){st('selpage',+this.value)};
+function sm(f){return new Promise(function(ok){
+ var done=false,why='';
+ function fin(v){if(done)return;done=true;if(!v)window.lastImgErr=why;ok(v)}
+ function draw(src,w,h){if(!w||!h)throw new Error('size 0');var s=Math.min(1,1080/Math.max(w,h)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*s));c.height=Math.max(1,Math.round(h*s));var g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(src,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.75)}
+ function viaImg(url,revoke,next){var im=new Image();im.onload=function(){try{fin(draw(im,im.naturalWidth||im.width,im.naturalHeight||im.height))}catch(e){why='draw:'+e.message;if(next)next();else fin(null)}if(revoke)try{URL.revokeObjectURL(url)}catch(e){}};im.onerror=function(){why='img-load';if(revoke)try{URL.revokeObjectURL(url)}catch(e){}if(next)next();else fin(null)};im.src=url}
+ function viaReader(){var r=new FileReader();r.onload=function(){viaImg(r.result,false,function(){fin(null)})};r.onerror=function(){why='reader';fin(null)};try{r.readAsDataURL(f)}catch(e){why='reader-throw';fin(null)}}
+ try{viaImg(URL.createObjectURL(f),true,viaReader)}catch(e){why='objurl';viaReader()}
+ setTimeout(function(){why=why||'timeout';fin(null)},25000)})}
+function pickImg(fl){
+ var a=Array.prototype.slice.call(fl||[]).slice(0,10),bad=0;if(!a.length){toast('কোনো ছবি পাওয়া যায়নি');return}
+ $('imgname').textContent='ছবি প্রসেস হচ্ছে... ('+a.length+'টি)';
+ a.reduce(function(p,f){return p.then(function(){return sm(f)}).then(function(d){if(d){if(imgData.length<10){imgData.push(d);showPrev()}}else bad++})},Promise.resolve())
+ .then(function(){showPrev();$('img').value='';if(bad)toast(bad+'টি ছবি পড়া যায়নি ['+(window.lastImgErr||'?')+']')})}
+function showPrev(){var p=$('prev');p.innerHTML='';imgData.forEach(function(d,i){var w=document.createElement('span');w.className='pv';w.innerHTML='<img src="'+d+'"><b onclick="rmImg('+i+')">✕</b>';p.appendChild(w)});
+ $('imgname').textContent=imgData.length?'📷 '+imgData.length+'টি ছবি (সর্বোচ্চ ১০টি)':'';}
+function rmImg(i){imgData.splice(i,1);showPrev()}
+function savePost(){
+ var t=$('text').value.trim(),w=$('when').value?new Date($('when').value).getTime():0;
+ if(!t&&!imgData.length){toast('লেখা বা ছবি দিন');return null}
+ var x=editId?byId(editId):null;
+ if(x){x.text=t;x.when=w}else{x={id:Date.now(),t:Date.now(),text:t,when:w,status:'draft'};posts.push(x)}
+ x.n=imgData.length;delete x.err;
+ if(!st('posts',posts))return null;
+ iput(x.id,imgData);clearEditor();render();toast('সেভ হয়েছে');return x}
+function saveSched(){var im=imgData.slice(),x=savePost();if(x)fbSend(x,true,false,im)}
+function clearEditor(){editId=null;imgData=[];$('text').value='';$('when').value='';showPrev();$('etitle').textContent='নতুন পোস্ট'}
+function editPost(id,a){var x=byId(id);editId=id;$('text').value=x.text;$('when').value=x.when?loc(x.when):'';$('etitle').textContent='পোস্ট এডিট';window.scrollTo(0,0);
+ (a?Promise.resolve(a):x.n?iget(id):Promise.resolve([])).then(function(r){imgData=r.slice();showPrev()})}
+function dupPost(id){var x=byId(id);(x.n?iget(id):Promise.resolve([])).then(function(a){
+ var y={id:Date.now(),t:Date.now(),text:x.text,when:0,status:'draft',n:a.length};posts.push(y);st('posts',posts);iput(y.id,a);render();editPost(y.id,a);toast('কপি হয়েছে — এডিট করে নতুন সময় দিয়ে শিডিউল করুন')})}
+function delPost(id){if(!confirm('মুছে ফেলবেন? (ফেসবুকে শিডিউল হয়ে থাকলে সেটা পেজের Publishing Tools থেকে বাতিল করতে হবে)'))return;posts=posts.filter(function(x){return x.id!==id});st('posts',posts);idel(id);render()}
+function blob(d){var a=d.split(','),m=a[0].match(/:(.*?);/)[1],b=atob(a[1]),n=b.length,u=new Uint8Array(n);while(n--)u[n]=b.charCodeAt(n);return new Blob([u],{type:m})}
+function fbSend(x,sch,silent,im){
+ function bad(m){if(!silent)alert(m);return Promise.resolve(false)}
+ var pg=pages[+$('page').value];if(!pg)return bad('কোনো পেজ সিলেক্ট করা নেই। ⚙️ সেটিংসে টোকেন দিয়ে "পেজ লোড করুন" চাপুন, তারপর পেজ সিলেক্ট করুন।');
+ var ts=0;if(sch){ts=Math.floor(x.when/1000);if(!x.when||ts<Date.now()/1000+600)return bad('এই পোস্টের সময় এখন থেকে ১০ মিনিটের কম বা পার হয়ে গেছে। ✏️ এডিট করে আরও পরের সময় দিন।')}
+ if(!silent&&!confirm('"'+pg.name+'" পেজে '+(sch?new Date(x.when).toLocaleString()+' এ শিডিউল':'এখনই পোস্ট')+' করবেন?'))return Promise.resolve(false);
+ if(!silent)toast('পাঠানো হচ্ছে...');
+ var f=function(u,b){return fetch(u,{method:'POST',body:b}).then(function(r){return r.json()}).then(function(j){
+  if(j.error)throw new Error(j.error.message+' (code '+j.error.code+(j.error.error_subcode?'/'+j.error.error_subcode:'')+')');return j})};
+ var tk=function(b){b.append('access_token',pg.token);return b};
+ return (im?Promise.resolve(im):x.n?iget(x.id):Promise.resolve([])).then(function(a){
+  var base=G+'/'+pg.id,body=new FormData(),up;
+  if(a.length===1){body.append('source',blob(a[0]),'p.jpg');if(x.text)body.append('caption',x.text);up=Promise.resolve([base+'/photos',body])}
+  else if(a.length>1){
+   up=a.reduce(function(p,d,i){return p.then(function(ids){var b=new FormData();b.append('source',blob(d),'p'+i+'.jpg');b.append('published','false');
+    return f(base+'/photos',tk(b)).then(function(j){ids.push(j.id);return ids})})},Promise.resolve([])).then(function(ids){
+     ids.forEach(function(id,i){body.append('attached_media['+i+']',JSON.stringify({media_fbid:id}))});body.append('message',x.text||'');return [base+'/feed',body]})}
+  else{body.append('message',x.text);up=Promise.resolve([base+'/feed',body])}
+  return up.then(function(r){var b=r[1];if(sch){b.append('published','false');b.append('scheduled_publish_time',ts)}return f(r[0],tk(b))})
+ }).then(function(){x.status=sch?'scheduled':'posted';x.page=pg.name;delete x.err;st('posts',posts);render();if(!silent)toast(sch?'শিডিউল হয়েছে ✅':'পোস্ট হয়েছে ✅');return true})
+ .catch(function(e){x.err=e.message;st('posts',posts);render();if(!silent)alert('ফেসবুকে পাঠানো যায়নি:\n'+e.message);return false})}
+function bulk(){
+ var d=posts.filter(function(x){return x.status==='draft'}).sort(function(a,b){return a.t-b.t});
+ if(!d.length){toast('কোনো ড্রাফট নেই');return}
+ var s=$('bstart').value,gap=+$('bgap').value||24,base=s?new Date(s).getTime():0,k=0,min=Date.now()+11*60000;
+ if(!pages[+$('page').value]){alert('আগে পেজ সিলেক্ট করুন');return}
+ d.forEach(function(x){if(!x.when||x.when<min){if(base){x.when=base+k*gap*36e5;k++}else x.when=0}});
+ var go=d.filter(function(x){return x.when>=min});
+ if(!go.length){alert('কোনো ড্রাফটে বৈধ সময় নেই। প্রথম পোস্টের সময় (এখন থেকে ১০ মিনিট পরের) দিন।');return}
+ if(!confirm(go.length+'টি ড্রাফট ফেসবুকে শিডিউল হবে। চালিয়ে যাবেন?'))return;
+ var b=$('bbtn'),ok=0;b.disabled=true;toast('শিডিউল হচ্ছে... অ্যাপ বন্ধ করবেন না');
+ go.reduce(function(p,x,i){return p.then(function(){toast('শিডিউল হচ্ছে '+(i+1)+'/'+go.length);return fbSend(x,true,true)}).then(function(r){if(r)ok++})},Promise.resolve()).then(function(){
+  b.disabled=false;st('posts',posts);render();alert(ok+'টি শিডিউল হয়েছে'+(ok<go.length?'\n'+(go.length-ok)+'টি হয়নি — ওই পোস্টের নিচে লাল এরর দেখুন':''))})}
+function loadPages(){
+ saveCfg();var tk=cfg.utoken;if(!tk){toast('টোকেন দিন');return}
+ var p=Promise.resolve(tk);
+ if(cfg.appId&&cfg.secret)p=fetch(G+'/oauth/access_token?grant_type=fb_exchange_token&client_id='+enc(cfg.appId)+'&client_secret='+enc(cfg.secret)+'&fb_exchange_token='+enc(tk))
+  .then(function(r){return r.json()}).then(function(j){if(j.access_token){tk=cfg.utoken=j.access_token;st('cfg',cfg);$('utoken').value=tk}return tk});
+ p.then(function(t){return fetch(G+'/me/accounts?fields=name,access_token&limit=100&access_token='+enc(t))})
+ .then(function(r){return r.json()}).then(function(j){
+  if(j.error){toast('এরর: '+j.error.message);return}
+  pages=(j.data||[]).map(function(p){return{id:p.id,name:p.name,token:p.access_token}});
+  st('pages',pages);render();toast(pages.length+'টি পেজ পাওয়া গেছে')})
+ .catch(function(){toast('নেটওয়ার্ক এরর')})}
+function fbLogin(){saveCfg();if(!cfg.appId){toast('আগে Facebook App ID দিন');return}
+ if(window.Android)Android.fbLogin(cfg.appId);else toast('শুধু অ্যাপে চলবে')}
+function openFb(){if(window.Android)Android.openFb();else window.open('https://m.facebook.com')}
+window.onFbToken=function(t){cfg.utoken=t;st('cfg',cfg);$('utoken').value=t;toast('লগইন সফল, পেজ লোড হচ্ছে...');loadPages()};
+function aiCall(prompt){
+ var m=cfg.aimodel,k=cfg.aikey;
+ if(cfg.aiprov==='claude')return fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+  headers:{'content-type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+  body:JSON.stringify({model:m||'claude-sonnet-5-5',max_tokens:3000,messages:[{role:'user',content:prompt}]})})
+  .then(function(r){return r.json()}).then(function(j){if(j.error)throw new Error(j.error.message);return j.content[0].text});
+ return fetch('https://generativelanguage.googleapis.com/v1beta/models/'+(m||'gemini-2.5-flash')+':generateContent?key='+enc(k),{method:'POST',
+  headers:{'content-type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})})
+  .then(function(r){return r.json()}).then(function(j){if(j.error)throw new Error(j.error.message);return j.candidates[0].content.parts[0].text})}
+function aiGen(){
+ saveCfg();if(!cfg.aikey){toast('সেটিংসে AI API Key দিন');return}
+ var topic=$('aitopic').value.trim(),n=Math.min(14,+$('ainum').value||3),gap=+$('aigap').value||24,s=$('aistart').value,auto=$('aiauto').checked;
+ if(!topic){toast('বিষয় লিখুন');return}if(!s){toast('প্রথম পোস্টের সময় দিন');return}
+ if(auto&&!pages[+$('page').value]){toast('আগে পেজ সিলেক্ট করুন');return}
+ var b=$('aibtn');b.disabled=true;toast('AI লিখছে...');
+ var pr='তুমি একজন সোশ্যাল মিডিয়া কনটেন্ট রাইটার। ফেসবুক পেজের জন্য '+n+'টি আলাদা পোস্ট লেখো। বিষয়/নির্দেশনা: '+topic+'। প্রতিটি পোস্ট বাংলায়, ছোট ও আকর্ষণীয়, দরকারে ইমোজি ও হ্যাশট্যাগসহ। শুধু একটি JSON array দাও, যেমন ["পোস্ট ১","পোস্ট ২"]। মার্কডাউন (* বা **) ব্যবহার করবে না। অন্য কিছু লিখবে না।';
+ aiCall(pr).then(function(t){
+  var a;try{a=JSON.parse(t.match(/\[[\s\S]*\]/)[0])}catch(e){a=t.split(/\n\s*\n/).filter(Boolean)}
+  var base=new Date(s).getTime(),made=[];
+  a.slice(0,n).forEach(function(tx,i){var x={id:Date.now()+i,t:Date.now()+i,text:String(tx).replace(/\*+/g,'').trim(),img:'',when:base+i*gap*36e5,status:'draft'};posts.push(x);made.push(x)});
+  st('posts',posts);render();
+  if(!auto){b.disabled=false;toast(made.length+'টি ড্রাফট তৈরি হয়েছে');return}
+  return made.reduce(function(p,x){return p.then(function(){return fbSend(x,true,true)})},Promise.resolve()).then(function(){b.disabled=false;toast('AI-র '+made.length+'টি পোস্ট ফেসবুকে শিডিউল হয়েছে ✅')})
+ }).catch(function(e){b.disabled=false;toast('এরর: '+e.message)})}
+function autoSt(){if(window.Android)$('autost').textContent='অবস্থা: '+Android.autoStatus()}
+function autoOn(){
+ saveCfg();var pg=pages[+$('page').value];
+ if(!window.Android){toast('শুধু অ্যাপে চলবে');return}
+ if(!cfg.aikey){toast('সেটিংসে AI API Key দিন');return}
+ if(!pg){toast('আগে পেজ সিলেক্ট করুন');return}
+ if(!cfg.autotopic){toast('বিষয় লিখুন');return}
+ if(!cfg.autotime){toast('সময় দিন');return}
+ Android.setAuto(JSON.stringify({prov:cfg.aiprov||'gemini',model:cfg.aimodel||'',key:cfg.aikey,topic:cfg.autotopic,time:cfg.autotime,pageId:pg.id,pageToken:pg.token}));
+ toast('চালু হয়েছে, প্রথম রান চলছে...');setTimeout(autoSt,8000);setTimeout(autoSt,20000)}
+function autoOff(){if(window.Android){Android.stopAuto();autoSt();toast('অটো পোস্ট বন্ধ')}}
+posts.forEach(function(x){if(x.img){iput(x.id,[x.img]);x.n=1;delete x.img}});st('posts',posts);
+fillCfg();render();autoSt();
+if(cfg.utoken&&!pages.length)loadPages();
+</script></body></html>
