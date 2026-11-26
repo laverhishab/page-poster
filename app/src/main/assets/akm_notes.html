@@ -24,6 +24,7 @@ button.b{background:linear-gradient(135deg,#1877f2,#4a63f5);color:#fff;border:0;
 button.b:active{transform:scale(.97)}button.g{background:var(--soft);color:var(--pri);box-shadow:none}
 button.r{background:#e5384f1a;color:var(--bad);box-shadow:none}button:disabled{opacity:.5}
 .small{font-size:12.5px;color:var(--mut);margin-top:6px}
+.cdl{color:var(--warn);font-weight:600}
 .note{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;background:var(--card)}
 .note p{margin:6px 0;white-space:pre-wrap;word-break:break-word}.note .b{padding:8px 12px;font-size:13px;margin-top:8px}
 .th img{height:72px;border-radius:10px;margin:0 6px 4px 0;object-fit:cover}
@@ -52,7 +53,8 @@ nav button span{display:block;font-size:21px;line-height:1.2}nav button.on{color
 <textarea id="text" placeholder="আপনার পোস্ট বা ক্যাপশন লিখুন..."></textarea>
 <input id="img" type="file" accept="image/*" multiple onchange="pickImg(this.files)">
 <div class="small" id="imgname"></div><div id="prev"></div>
-<input id="when" type="datetime-local">
+<input id="when" type="datetime-local" oninput="whenHint()" onchange="whenHint()">
+<div class="small cdl" id="whenhint"></div>
 <div class="small">⏰ সময় দিলে ফেসবুক ঠিক সময়ে নিজেই পোস্ট করবে (অ্যাপ বন্ধ থাকলেও)। এখন থেকে কমপক্ষে ১০ মিনিট পরের সময় দিন।</div>
 <button class="b" onclick="savePost()">💾 সেভ</button><button class="b" onclick="saveSched()">⏰ সেভ + শিডিউল</button><button class="b g" onclick="clearEditor()">নতুন</button>
 </div>
@@ -100,7 +102,7 @@ nav button span{display:block;font-size:21px;line-height:1.2}nav button.on{color
 <select id="aiprov"><option value="gemini">Google Gemini</option><option value="claude">Claude (Anthropic)</option></select>
 <input id="aimodel" placeholder="মডেল (খালি রাখলে ডিফল্ট)"><input id="aikey" type="password" placeholder="AI API Key">
 <button class="b" onclick="saveCfg();toast('সেটিংস সেভ হয়েছে')">💾 সেভ</button></div>
-<div class="small" style="text-align:center">Page Post · সংস্করণ 2.12</div>
+<div class="small" style="text-align:center">Page Post · সংস্করণ 2.13</div>
 </section>
 
 </main>
@@ -135,12 +137,21 @@ function idb(){return new Promise(function(ok,no){if(DB)return ok(DB);try{var r=
 function iput(k,v){return idb().then(function(d){return new Promise(function(ok,no){var t=d.transaction('i','readwrite');t.objectStore('i').put(v,k);t.oncomplete=ok;t.onerror=no})}).catch(function(){st('img'+k,v)})}
 function iget(k){return idb().then(function(d){return new Promise(function(ok,no){var r=d.transaction('i').objectStore('i').get(k);r.onsuccess=function(){ok(r.result||ls('img'+k,[]))};r.onerror=no})}).catch(function(){return ls('img'+k,[])})}
 function idel(k){try{localStorage.removeItem('img'+k)}catch(e){}return idb().then(function(d){d.transaction('i','readwrite').objectStore('i').delete(k)}).catch(function(){})}
+function left(ms){var s=Math.floor((ms-Date.now())/1000);if(s<=0)return'';var d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60),c=s%60;
+ if(d)return d+' দিন '+h+' ঘণ্টা '+m+' মিনিট';if(h)return h+' ঘণ্টা '+m+' মিনিট';return m+' মিনিট '+c+' সেকেন্ড'}
+function cdHtml(x){if(!x.when||x.when<=Date.now()||x.status==='posted')return'';
+ return'<div class="small cdl">⏳ '+(x.status==='scheduled'?'পোস্ট হতে বাকি: ':'সময় আসতে বাকি: ')+'<b class="cd" data-w="'+x.when+'">'+left(x.when)+'</b></div>'}
+function whenHint(){var v=$('when').value,h=$('whenhint');if(!v){h.textContent='';return}var ms=new Date(v).getTime(),l=left(ms);
+ h.textContent=l?'⏳ এখন থেকে '+l+' পরে':'⚠️ এই সময় পার হয়ে গেছে'}
+function tickCd(){var e=document.querySelectorAll('.cd'),again=false;
+ Array.prototype.forEach.call(e,function(c){var l=left(+c.getAttribute('data-w'));if(l)c.textContent=l;else again=true});
+ if(again)render();whenHint()}
 function render(){
  var l=$('list');l.innerHTML=posts.length?'':'<div class="small">কোনো পোস্ট নেই</div>';
  posts.slice().sort(function(a,b){return b.t-a.t}).forEach(function(x){
   var d=document.createElement('div');d.className='note';
   var s={draft:'📝 ড্রাফট',scheduled:(x.when&&x.when<Date.now()?'✅ সময় পার, ফেসবুকে প্রকাশিত':'⏰ FB-তে শিডিউল হয়েছে'),posted:'✅ পোস্ট হয়েছে'}[x.status];
-  d.innerHTML=(x.n?'<div class="th" id="t'+x.id+'"></div>':'')+'<p>'+esc(x.text||'(শুধু ছবি)')+'</p><div class="small"><span class="bd '+(x.status==='scheduled'&&x.when&&x.when<Date.now()?'posted':x.status)+'">'+s+'</span>'+(x.when?' · 🕒 '+new Date(x.when).toLocaleString():'')+(x.page?' · 📄 '+esc(x.page):'')+(x.n?' · 📷 '+x.n:'')+'</div>'+
+  d.innerHTML=(x.n?'<div class="th" id="t'+x.id+'"></div>':'')+'<p>'+esc(x.text||'(শুধু ছবি)')+'</p><div class="small"><span class="bd '+(x.status==='scheduled'&&x.when&&x.when<Date.now()?'posted':x.status)+'">'+s+'</span>'+(x.when?' · 🕒 '+new Date(x.when).toLocaleString():'')+(x.page?' · 📄 '+esc(x.page):'')+(x.n?' · 📷 '+x.n:'')+'</div>'+cdHtml(x)+
   (x.err?'<div class="small" style="color:#e41e3f">⚠️ '+esc(x.err)+'</div>':'')+
   (x.status==='draft'?'<button class="b" onclick="fbSend(byId('+x.id+'),false)">🚀 এখনই</button><button class="b" onclick="fbSend(byId('+x.id+'),true)">⏰ শিডিউল</button><button class="b g" onclick="editPost('+x.id+')">✏️ এডিট</button>':'<button class="b g" onclick="dupPost('+x.id+')">🔁 কপি করে আবার শিডিউল</button>')+
   '<button class="b r" onclick="delPost('+x.id+')">🗑</button>';
@@ -182,8 +193,8 @@ function savePost(){
  if(!st('posts',posts))return null;
  iput(x.id,imgData);clearEditor();render();tab('list');toast('সেভ হয়েছে');return x}
 function saveSched(){var im=imgData.slice(),x=savePost();if(x)fbSend(x,true,false,im)}
-function clearEditor(){editId=null;imgData=[];$('text').value='';$('when').value='';showPrev();$('etitle').textContent='নতুন পোস্ট'}
-function editPost(id,a){tab('new');var x=byId(id);editId=id;$('text').value=x.text;$('when').value=x.when?loc(x.when):'';$('etitle').textContent='পোস্ট এডিট';window.scrollTo(0,0);
+function clearEditor(){editId=null;imgData=[];$('text').value='';$('when').value='';whenHint();showPrev();$('etitle').textContent='নতুন পোস্ট'}
+function editPost(id,a){tab('new');var x=byId(id);editId=id;$('text').value=x.text;$('when').value=x.when?loc(x.when):'';whenHint();$('etitle').textContent='পোস্ট এডিট';window.scrollTo(0,0);
  (a?Promise.resolve(a):x.n?iget(id):Promise.resolve([])).then(function(r){imgData=r.slice();showPrev()})}
 function dupPost(id){var x=byId(id);(x.n?iget(id):Promise.resolve([])).then(function(a){
  var y={id:Date.now(),t:Date.now(),text:x.text,when:0,status:'draft',n:a.length};posts.push(y);st('posts',posts);iput(y.id,a);render();editPost(y.id,a);toast('কপি হয়েছে — এডিট করে নতুন সময় দিয়ে শিডিউল করুন')})}
@@ -207,7 +218,7 @@ function fbSend(x,sch,silent,im){
      ids.forEach(function(id,i){body.append('attached_media['+i+']',JSON.stringify({media_fbid:id}))});body.append('message',x.text||'');return [base+'/feed',body]})}
   else{body.append('message',x.text);up=Promise.resolve([base+'/feed',body])}
   return up.then(function(r){var b=r[1];if(sch){b.append('published','false');b.append('scheduled_publish_time',ts)}return f(r[0],tk(b))})
- }).then(function(){x.status=sch?'scheduled':'posted';x.page=pg.name;delete x.err;st('posts',posts);render();if(!silent)toast(sch?'শিডিউল হয়েছে ✅':'পোস্ট হয়েছে ✅');return true})
+ }).then(function(){x.status=sch?'scheduled':'posted';x.page=pg.name;delete x.err;st('posts',posts);render();if(!silent)toast(sch?'শিডিউল হয়েছে ✅ · '+(left(x.when)||'এখনই')+' পরে পোস্ট হবে':'পোস্ট হয়েছে ✅');return true})
  .catch(function(e){x.err=e.message;st('posts',posts);render();if(!silent)alert('ফেসবুকে পাঠানো যায়নি:\n'+e.message);return false})}
 function bulk(){
  var d=posts.filter(function(x){return x.status==='draft'}).sort(function(a,b){return a.t-b.t});
@@ -291,6 +302,6 @@ function autoOn(){
  toast('চালু হয়েছে, প্রথম রান চলছে...');setTimeout(autoSt,8000);setTimeout(autoSt,20000)}
 function autoOff(){if(window.Android){Android.stopAuto();autoSt();toast('অটো পোস্ট বন্ধ')}}
 posts.forEach(function(x){if(x.img){iput(x.id,[x.img]);x.n=1;delete x.img}});st('posts',posts);
-fillCfg();render();autoSt();tab(ls('tab','new'));
+fillCfg();render();autoSt();tab(ls('tab','new'));setInterval(tickCd,1000);
 if(cfg.utoken&&!pages.length)loadPages();
 </script></body></html>
