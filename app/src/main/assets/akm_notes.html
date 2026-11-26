@@ -88,9 +88,9 @@ nav button span{display:block;font-size:21px;line-height:1.2}nav button.on{color
 <input id="utoken" type="password" placeholder="User Access Token">
 <button class="b" onclick="saveCfg();toast('টোকেন সেভ হয়েছে')">💾 টোকেন সেভ</button><button class="b g" onclick="loadPages()">পেজ লোড করুন</button>
 <div id="pcount" class="small"></div>
-<details><summary>📋 নোট থেকে একসাথে বসান</summary>
-<div class="small">টোকেন ও AI Key লেখা নোট পেস্ট করলে ঘর নিজে ভরবে।</div>
-<textarea id="paste" style="min-height:70px" placeholder="নোট এখানে পেস্ট করুন"></textarea>
+<details><summary>📋 নোট / পেজ লিস্ট পেস্ট করুন</summary>
+<div class="small">টোকেন ও AI Key লেখা নোট, অথবা Explorer-এর <b>me/accounts</b> রেজাল্ট (পুরো লেখা) পেস্ট করলে ঘর/পেজ নিজে ভরবে।</div>
+<textarea id="paste" style="min-height:70px" placeholder="নোট বা me/accounts-এর রেজাল্ট এখানে পেস্ট করুন"></textarea>
 <button class="b g" onclick="importNote()">📥 বসান</button></details>
 <details><summary>উন্নত (ঐচ্ছিক)</summary>
 <div class="small">ছোট টোকেনকে ৬০ দিনের করতে চাইলে শুধু।</div>
@@ -100,7 +100,7 @@ nav button span{display:block;font-size:21px;line-height:1.2}nav button.on{color
 <select id="aiprov"><option value="gemini">Google Gemini</option><option value="claude">Claude (Anthropic)</option></select>
 <input id="aimodel" placeholder="মডেল (খালি রাখলে ডিফল্ট)"><input id="aikey" type="password" placeholder="AI API Key">
 <button class="b" onclick="saveCfg();toast('সেটিংস সেভ হয়েছে')">💾 সেভ</button></div>
-<div class="small" style="text-align:center">Page Post · সংস্করণ 2.11</div>
+<div class="small" style="text-align:center">Page Post · সংস্করণ 2.12</div>
 </section>
 
 </main>
@@ -221,8 +221,14 @@ function bulk(){
  var b=$('bbtn'),ok=0;b.disabled=true;toast('শিডিউল হচ্ছে... অ্যাপ বন্ধ করবেন না');
  go.reduce(function(p,x,i){return p.then(function(){toast('শিডিউল হচ্ছে '+(i+1)+'/'+go.length);return fbSend(x,true,true)}).then(function(r){if(r)ok++})},Promise.resolve()).then(function(){
   b.disabled=false;st('posts',posts);render();alert(ok+'টি শিডিউল হয়েছে'+(ok<go.length?'\n'+(go.length-ok)+'টি হয়নি — ওই পোস্টের নিচে লাল এরর দেখুন':''))})}
+function importPages(t){
+ var i=t.indexOf('{'),j=t.lastIndexOf('}');if(i<0||j<i)return 0;
+ try{var o=JSON.parse(t.slice(i,j+1)),a=o.data||[];
+  var r=a.filter(function(p){return p&&p.access_token&&p.id}).map(function(p){return{id:p.id,name:p.name||p.id,token:p.access_token}});
+  if(!r.length)return 0;pages=r;st('pages',pages);st('selpage',0);render();return r.length}catch(e){return 0}}
 function importNote(){
- var t=$('paste').value,n=0,m;
+ var t=$('paste').value,n=0,m,np=importPages(t);
+ if(np){$('paste').value='';toast(np+'টি পেজ বসানো হয়েছে ✅ উপরে পেজ বেছে নিন');return}
  if(m=t.match(/\b\d{14,17}\b/)){$('appid').value=m[0];n++}
  if(m=t.match(/\b[a-f0-9]{32}\b/)){$('secret').value=m[0];n++}
  var tk=t.match(/\bEA[A-Za-z0-9]{50,}\b/);if(tk){$('utoken').value=tk[0];n++}
