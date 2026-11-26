@@ -32,7 +32,6 @@ public class MainActivity extends Activity {
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setAllowFileAccess(true);
-        s.setAllowContentAccess(true);
         s.setAllowUniversalAccessFromFileURLs(true);
         web.addJavascriptInterface(new Bridge(), "Android");
 
@@ -45,11 +44,7 @@ public class MainActivity extends Activity {
                 }
                 filePathCallback = callback;
                 try {
-                    Intent pick = new Intent(Intent.ACTION_GET_CONTENT);
-                    pick.addCategory(Intent.CATEGORY_OPENABLE);
-                    pick.setType("image/*");
-                    pick.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                    startActivityForResult(Intent.createChooser(pick, "ছবি বাছুন"), 1001);
+                    startActivityForResult(params.createIntent(), 1001);
                 } catch (Exception e) {
                     filePathCallback = null;
                     callback.onReceiveValue(null);
@@ -180,19 +175,8 @@ public class MainActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1001 && filePathCallback != null) {
-            Uri[] res = null;
-            if (resultCode == RESULT_OK && data != null) {
-                if (data.getClipData() != null) {
-                    int n = data.getClipData().getItemCount();
-                    res = new Uri[n];
-                    for (int i = 0; i < n; i++) {
-                        res[i] = data.getClipData().getItemAt(i).getUri();
-                    }
-                } else if (data.getData() != null) {
-                    res = new Uri[]{data.getData()};
-                }
-            }
-            filePathCallback.onReceiveValue(res);
+            filePathCallback.onReceiveValue(
+                    WebChromeClient.FileChooserParams.parseResult(resultCode, data));
             filePathCallback = null;
         }
     }

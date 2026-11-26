@@ -3,87 +3,113 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Page Post</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:sans-serif;background:#f0f2f5;color:#1c1e21}
-header{background:#1877f2;color:#fff;padding:14px 16px;font-size:18px;font-weight:bold;display:flex;justify-content:space-between;align-items:center}
-header button{background:none;border:0;color:#fff;font-size:20px;margin-left:8px}
-main{padding:12px}.card{background:#fff;border-radius:10px;padding:12px;margin-bottom:12px;box-shadow:0 1px 2px #0002}
-textarea,input,select{width:100%;padding:10px;border:1px solid #ccd0d5;border-radius:8px;font-size:16px;margin-top:6px}
-textarea{min-height:110px}input[type=checkbox]{width:auto;margin-right:6px}
-button.b{background:#1877f2;color:#fff;border:0;border-radius:8px;padding:10px 14px;font-size:15px;margin:8px 6px 0 0}
-button.g{background:#e4e6eb;color:#1c1e21}button.r{background:#e41e3f}button:disabled{opacity:.5}
-.note{border-bottom:1px solid #eee;padding:10px 0}.note:last-child{border:0}
-.note p{margin:0 0 6px;white-space:pre-wrap}.small{font-size:12px;color:#65676b;margin-top:4px}
-.th img{height:70px;border-radius:6px;margin:0 4px 4px 0}
-.pv{position:relative;display:inline-block;margin:6px 6px 0 0}.pv img{height:70px;border-radius:6px}.pv b{position:absolute;top:2px;right:2px;background:#000a;color:#fff;border-radius:50%;width:20px;height:20px;text-align:center;font-size:12px;line-height:20px}
-.row{display:flex;gap:8px}.row>*{flex:1}
-#msg{position:fixed;bottom:12px;left:12px;right:12px;background:#333;color:#fff;padding:12px;border-radius:8px;display:none;z-index:9}
-.hide{display:none}
+:root{--bg:#f3f5fb;--card:#fff;--ink:#1b2030;--mut:#6b7385;--pri:#1877f2;--pri2:#5b4bff;--ok:#12a150;--warn:#d98200;--bad:#e5384f;--line:#e6e9f2;--soft:#eef3ff}
+@media(prefers-color-scheme:dark){:root{--bg:#10131c;--card:#181c28;--ink:#e9ecf5;--mut:#99a1b5;--line:#272d3d;--soft:#1f2740}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,'Noto Sans Bengali',sans-serif;background:var(--bg);color:var(--ink);padding-bottom:84px;line-height:1.5}
+header{background:linear-gradient(135deg,#1877f2,#5b4bff);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px}
+header svg{width:40px;height:40px;flex:none;border-radius:11px;box-shadow:0 2px 8px #0003}
+header h1{margin:0;font-size:19px;line-height:1.1}header small{opacity:.85;font-size:12px}
+header .sp{flex:1}header button{background:#ffffff26;border:0;color:#fff;width:40px;height:40px;border-radius:12px;font-size:19px}
+.pagebar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 12px 4px;display:flex;align-items:center;gap:8px}
+.pagebar select{margin:0;flex:1;font-weight:600}
+main{padding:8px 12px 12px;max-width:640px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 2px 10px #1b203010}
+.card>b:first-child,h2{display:block;font-size:16px;margin:0 0 4px}
+textarea,input,select{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:12px;font-size:16px;margin-top:8px;background:var(--card);color:var(--ink);font-family:inherit}
+textarea:focus,input:focus,select:focus{outline:0;border-color:var(--pri);box-shadow:0 0 0 3px #1877f233}
+textarea{min-height:120px;resize:vertical}input[type=checkbox]{width:auto;margin:0 6px 0 0}
+input[type=file]{padding:10px;border-style:dashed;background:var(--soft)}
+button.b{background:linear-gradient(135deg,#1877f2,#4a63f5);color:#fff;border:0;border-radius:12px;padding:11px 16px;font-size:15px;font-weight:600;margin:10px 8px 0 0;box-shadow:0 3px 8px #1877f240}
+button.b:active{transform:scale(.97)}button.g{background:var(--soft);color:var(--pri);box-shadow:none}
+button.r{background:#e5384f1a;color:var(--bad);box-shadow:none}button:disabled{opacity:.5}
+.small{font-size:12.5px;color:var(--mut);margin-top:6px}
+.note{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;background:var(--card)}
+.note p{margin:6px 0;white-space:pre-wrap;word-break:break-word}.note .b{padding:8px 12px;font-size:13px;margin-top:8px}
+.th img{height:72px;border-radius:10px;margin:0 6px 4px 0;object-fit:cover}
+.bd{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600}
+.bd.draft{background:#eef0f6;color:var(--mut)}.bd.scheduled{background:#fff3dc;color:var(--warn)}.bd.posted{background:#dff6e8;color:var(--ok)}
+.pv{position:relative;display:inline-block;margin:8px 8px 0 0}.pv img{height:78px;border-radius:10px}
+.pv b{position:absolute;top:-6px;right:-6px;background:var(--bad);color:#fff;border-radius:50%;width:22px;height:22px;text-align:center;font-size:12px;line-height:22px}
+.row{display:flex;gap:8px}.row>*{flex:1}.hide{display:none}
+details{margin-top:12px}summary{color:var(--pri);font-weight:600;font-size:14px}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:8;background:var(--card);border-top:1px solid var(--line);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
+nav button{flex:1;background:none;border:0;color:var(--mut);font-size:11.5px;padding:6px 0;border-radius:12px;font-family:inherit}
+nav button span{display:block;font-size:21px;line-height:1.2}nav button.on{color:var(--pri);background:var(--soft);font-weight:700}
+#msg{position:fixed;bottom:88px;left:14px;right:14px;background:#222a;backdrop-filter:blur(6px);background:#1b2030ee;color:#fff;padding:12px 14px;border-radius:14px;display:none;z-index:9;font-size:14px}
 </style></head><body>
-<header><span>📝 Page Post</span><span><button onclick="openFb()">🌐</button><button onclick="toggle('settings')">⚙️</button></span></header>
+<header>
+<svg viewBox="0 0 512 512"><rect width="512" height="512" rx="115" fill="#fff"/><rect x="24" y="24" width="464" height="464" rx="96" fill="#1877f2"/><path d="M145 100h110l50 50v250H145z" fill="#fff"/><path d="M255 100l50 50h-50z" fill="#c8defc"/><rect x="185" y="190" width="100" height="18" rx="9" fill="#1877f2"/><rect x="185" y="240" width="100" height="18" rx="9" fill="#1877f2"/><rect x="185" y="290" width="62" height="18" rx="9" fill="#1877f2"/><circle cx="350" cy="365" r="85" fill="#ffb300" stroke="#1877f2" stroke-width="7"/><path d="M305 325l95 40-95 40 17-40z" fill="#fff"/></svg>
+<div><h1>Page Post</h1><small>লিখুন · শিডিউল করুন · AI দিয়ে পোস্ট</small></div><span class="sp"></span>
+<button onclick="openFb()" title="Facebook">🌐</button>
+</header>
+<div class="pagebar"><span>📄</span><select id="page"></select></div>
 <main>
-<div id="settings" class="card hide">
-<b>সেটিংস</b> <span class="small">(সংস্করণ 2.7)</span>
-<p class="small">১) Facebook App ID দিয়ে লগইন করলে টোকেন নিজেই আসবে ও সেভ থাকবে। অথবা Graph API Explorer-এর টোকেন নিচে বসান। (পারমিশন: pages_show_list, pages_manage_posts)</p>
-<input id="appid" placeholder="Facebook App ID">
-<input id="secret" type="password" placeholder="App Secret (ঐচ্ছিক — টোকেন ৬০ দিনের লম্বা মেয়াদি করতে)">
-<button class="b" onclick="fbLogin()">🔵 Facebook দিয়ে লগইন</button>
-<input id="utoken" type="password" placeholder="User Access Token">
-<button class="b" onclick="saveCfg();toast('টোকেন সেভ হয়েছে')">💾 টোকেন সেভ</button>
-<button class="b g" onclick="loadPages()">পেজ লোড করুন</button>
-<div id="pcount" class="small"></div>
-<hr style="border:0;border-top:1px solid #eee;margin:12px 0">
-<b>🤖 AI সেটিংস</b>
-<select id="aiprov"><option value="gemini">Google Gemini</option><option value="claude">Claude (Anthropic)</option></select>
-<input id="aimodel" placeholder="মডেল (খালি রাখলে ডিফল্ট)">
-<input id="aikey" type="password" placeholder="AI API Key">
-<button class="b" onclick="saveCfg();toast('সেটিংস সেভ হয়েছে')">💾 সেটিংস সেভ</button>
-</div>
 
+<section id="tab-new">
 <div class="card">
 <b id="etitle">নতুন পোস্ট</b>
-<textarea id="text" placeholder="ক্যাপশন / পোস্ট লিখুন..."></textarea>
+<textarea id="text" placeholder="আপনার পোস্ট বা ক্যাপশন লিখুন..."></textarea>
 <input id="img" type="file" accept="image/*" multiple onchange="pickImg(this.files)">
 <div class="small" id="imgname"></div><div id="prev"></div>
 <input id="when" type="datetime-local">
-<div class="small">সময় দিলে ফেসবুকে ঠিক সময়ে অটো পোস্ট হবে (অ্যাপ বন্ধ থাকলেও)। কমপক্ষে ১০ মিনিট পরের সময় দিন।</div>
-<button class="b" onclick="savePost()">💾 সেভ</button>
-<button class="b" onclick="saveSched()">⏰ সেভ + শিডিউল</button>
-<button class="b g" onclick="clearEditor()">নতুন</button>
+<div class="small">⏰ সময় দিলে ফেসবুক ঠিক সময়ে নিজেই পোস্ট করবে (অ্যাপ বন্ধ থাকলেও)। এখন থেকে কমপক্ষে ১০ মিনিট পরের সময় দিন।</div>
+<button class="b" onclick="savePost()">💾 সেভ</button><button class="b" onclick="saveSched()">⏰ সেভ + শিডিউল</button><button class="b g" onclick="clearEditor()">নতুন</button>
 </div>
+</section>
 
-<div class="card">
-<b>পেজ সিলেক্ট করুন</b>
-<select id="page"></select>
-<div class="small">পোস্ট/শিডিউল এই পেজে যাবে</div>
-</div>
-
-<div class="card">
-<b>🤖 AI দিয়ে একবারে অনেক পোস্ট</b>
-<textarea id="aitopic" style="min-height:70px" placeholder="বিষয়/নির্দেশনা, যেমন: ফিটনেস টিপস, প্রতিদিন ছোট অনুপ্রেরণামূলক পোস্ট"></textarea>
-<div class="row"><input id="ainum" type="number" min="1" max="14" value="3" placeholder="কয়টি"><input id="aigap" type="number" min="1" value="24" placeholder="ঘণ্টা পরপর"></div>
-<input id="aistart" type="datetime-local">
-<div class="small">কয়টি পোস্ট · কত ঘণ্টা পরপর · প্রথম পোস্টের সময়</div>
-<label class="small" style="display:block;margin-top:8px"><input type="checkbox" id="aiauto" checked>তৈরি হলেই ফেসবুকে অটো শিডিউল করুন</label>
-<button class="b" id="aibtn" onclick="aiGen()">🤖 AI দিয়ে পোস্ট বানান</button>
-</div>
-
-<div class="card">
-<b>🔁 রোজ অটো পোস্ট (অ্যাপ বন্ধ থাকলেও)</b>
-<textarea id="autotopic" style="min-height:70px" placeholder="বিষয়, যেমন: ফিটনেস টিপস, প্রতিদিন একটি ছোট অনুপ্রেরণামূলক পোস্ট"></textarea>
-<input id="autotime" type="time" value="09:00">
-<div class="small">রোজ এই সময়ে AI নতুন পোস্ট লিখে সিলেক্ট করা পেজে দেবে। ফোন নিজেই ~৬ ঘণ্টা পরপর আগামী ৩ দিনের পোস্ট শিডিউল করে রাখে।</div>
-<div class="small" id="autost" style="white-space:pre-wrap"></div>
-<button class="b" onclick="autoOn()">▶️ চালু করুন</button>
-<button class="b r" onclick="autoOff()">⏹ বন্ধ করুন</button>
-</div>
-
+<section id="tab-list" class="hide">
+<div class="card"><b>আমার পোস্ট</b><div id="list" style="margin-top:8px"></div></div>
 <div class="card"><b>📅 সব ড্রাফট একসাথে শিডিউল</b>
 <div class="row"><input id="bgap" type="number" min="1" value="24"><input id="bstart" type="datetime-local"></div>
-<div class="small">ঘণ্টা পরপর · প্রথম পোস্টের সময়। যে ড্রাফটে নিজের সময় দেওয়া আছে তার সময় বদলাবে না; বাকিগুলো এই সময় থেকে পরপর বসবে।</div>
+<div class="small">ঘণ্টা পরপর · প্রথম পোস্টের সময়। যে ড্রাফটে নিজের সময় আছে সেটা বদলাবে না, বাকিগুলো পরপর বসবে।</div>
 <button class="b" id="bbtn" onclick="bulk()">📅 সব ড্রাফট শিডিউল করুন</button></div>
+</section>
 
-<div class="card"><b>আমার পোস্ট</b><div id="list"></div></div>
+<section id="tab-ai" class="hide">
+<div class="card"><b>🔁 রোজ অটো পোস্ট</b>
+<div class="small">অ্যাপ বন্ধ থাকলেও রোজ নির্দিষ্ট সময়ে AI নতুন পোস্ট লিখে পেজে দেবে।</div>
+<textarea id="autotopic" style="min-height:76px" placeholder="বিষয়, যেমন: ফিটনেস টিপস, রোজ একটি ছোট অনুপ্রেরণামূলক পোস্ট"></textarea>
+<input id="autotime" type="time" value="09:00">
+<div class="small" id="autost" style="white-space:pre-wrap"></div>
+<button class="b" onclick="autoOn()">▶️ চালু করুন</button><button class="b r" onclick="autoOff()">⏹ বন্ধ</button></div>
+<div class="card"><b>🤖 AI দিয়ে একবারে অনেক পোস্ট</b>
+<textarea id="aitopic" style="min-height:76px" placeholder="বিষয়/নির্দেশনা লিখুন"></textarea>
+<div class="row"><input id="ainum" type="number" min="1" max="14" value="3"><input id="aigap" type="number" min="1" value="24"></div>
+<input id="aistart" type="datetime-local">
+<div class="small">কয়টি পোস্ট · কত ঘণ্টা পরপর · প্রথম পোস্টের সময়</div>
+<label class="small" style="display:block;margin-top:10px"><input type="checkbox" id="aiauto" checked>তৈরি হলেই ফেসবুকে অটো শিডিউল করুন</label>
+<button class="b" id="aibtn" onclick="aiGen()">🤖 AI দিয়ে বানান</button></div>
+</section>
+
+<section id="tab-set" class="hide">
+<div class="card"><b>🔑 ফেসবুক টোকেন</b>
+<div class="small">৬০ দিনের User Access Token এখানে বসান। App ID বা Secret লাগবে না।</div>
+<input id="utoken" type="password" placeholder="User Access Token">
+<button class="b" onclick="saveCfg();toast('টোকেন সেভ হয়েছে')">💾 টোকেন সেভ</button><button class="b g" onclick="loadPages()">পেজ লোড করুন</button>
+<div id="pcount" class="small"></div>
+<details><summary>📋 নোট থেকে একসাথে বসান</summary>
+<div class="small">টোকেন ও AI Key লেখা নোট পেস্ট করলে ঘর নিজে ভরবে।</div>
+<textarea id="paste" style="min-height:70px" placeholder="নোট এখানে পেস্ট করুন"></textarea>
+<button class="b g" onclick="importNote()">📥 বসান</button></details>
+<details><summary>উন্নত (ঐচ্ছিক)</summary>
+<div class="small">ছোট টোকেনকে ৬০ দিনের করতে চাইলে শুধু।</div>
+<input id="appid" placeholder="Facebook App ID"><input id="secret" type="password" placeholder="App Secret"></details>
+</div>
+<div class="card"><b>🤖 AI সেটিংস</b>
+<select id="aiprov"><option value="gemini">Google Gemini</option><option value="claude">Claude (Anthropic)</option></select>
+<input id="aimodel" placeholder="মডেল (খালি রাখলে ডিফল্ট)"><input id="aikey" type="password" placeholder="AI API Key">
+<button class="b" onclick="saveCfg();toast('সেটিংস সেভ হয়েছে')">💾 সেভ</button></div>
+<div class="small" style="text-align:center">Page Post · সংস্করণ 2.11</div>
+</section>
+
 </main>
+<nav>
+<button id="nv-new" onclick="tab('new')"><span>✍️</span>নতুন</button>
+<button id="nv-list" onclick="tab('list')"><span>🗂️</span>পোস্ট</button>
+<button id="nv-ai" onclick="tab('ai')"><span>🤖</span>AI</button>
+<button id="nv-set" onclick="tab('set')"><span>⚙️</span>সেটিংস</button>
+</nav>
 <div id="msg"></div>
 <script>
 var G='https://graph.facebook.com/v21.0';
@@ -92,6 +118,7 @@ function enc(s){return encodeURIComponent(s)}
 function toast(t){var m=$('msg');m.textContent=t;m.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(function(){m.style.display='none'},4000)}
 function ls(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
 function st(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){toast('জায়গা শেষ! পুরনো পোস্ট বা ছবি মুছুন');return false}}
+function tab(n){['new','list','ai','set'].forEach(function(t){$('tab-'+t).classList.toggle('hide',t!==n);$('nv-'+t).classList.toggle('on',t===n)});st('tab',n);window.scrollTo(0,0)}
 function toggle(id){$(id).classList.toggle('hide')}
 function esc(s){return String(s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
 function loc(ms){return new Date(ms-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,16)}
@@ -113,7 +140,7 @@ function render(){
  posts.slice().sort(function(a,b){return b.t-a.t}).forEach(function(x){
   var d=document.createElement('div');d.className='note';
   var s={draft:'📝 ড্রাফট',scheduled:(x.when&&x.when<Date.now()?'✅ সময় পার, ফেসবুকে প্রকাশিত':'⏰ FB-তে শিডিউল হয়েছে'),posted:'✅ পোস্ট হয়েছে'}[x.status];
-  d.innerHTML=(x.n?'<div class="th" id="t'+x.id+'"></div>':'')+'<p>'+esc(x.text||'(শুধু ছবি)')+'</p><div class="small">'+s+(x.when?' · 🕒 '+new Date(x.when).toLocaleString():'')+(x.page?' · 📄 '+esc(x.page):'')+(x.n?' · 📷 '+x.n:'')+'</div>'+
+  d.innerHTML=(x.n?'<div class="th" id="t'+x.id+'"></div>':'')+'<p>'+esc(x.text||'(শুধু ছবি)')+'</p><div class="small"><span class="bd '+(x.status==='scheduled'&&x.when&&x.when<Date.now()?'posted':x.status)+'">'+s+'</span>'+(x.when?' · 🕒 '+new Date(x.when).toLocaleString():'')+(x.page?' · 📄 '+esc(x.page):'')+(x.n?' · 📷 '+x.n:'')+'</div>'+
   (x.err?'<div class="small" style="color:#e41e3f">⚠️ '+esc(x.err)+'</div>':'')+
   (x.status==='draft'?'<button class="b" onclick="fbSend(byId('+x.id+'),false)">🚀 এখনই</button><button class="b" onclick="fbSend(byId('+x.id+'),true)">⏰ শিডিউল</button><button class="b g" onclick="editPost('+x.id+')">✏️ এডিট</button>':'<button class="b g" onclick="dupPost('+x.id+')">🔁 কপি করে আবার শিডিউল</button>')+
   '<button class="b r" onclick="delPost('+x.id+')">🗑</button>';
@@ -126,19 +153,23 @@ function render(){
  $('pcount').textContent=pages.length?pages.length+'টি পেজ সেভ আছে':'';
 }
 $('page').onchange=function(){st('selpage',+this.value)};
+var dbg=[];
 function sm(f){return new Promise(function(ok){
- var done=false,why='';
- function fin(v){if(done)return;done=true;if(!v)window.lastImgErr=why;ok(v)}
- function draw(src,w,h){if(!w||!h)throw new Error('size 0');var s=Math.min(1,1080/Math.max(w,h)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*s));c.height=Math.max(1,Math.round(h*s));var g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(src,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.75)}
- function viaImg(url,revoke,next){var im=new Image();im.onload=function(){try{fin(draw(im,im.naturalWidth||im.width,im.naturalHeight||im.height))}catch(e){why='draw:'+e.message;if(next)next();else fin(null)}if(revoke)try{URL.revokeObjectURL(url)}catch(e){}};im.onerror=function(){why='img-load';if(revoke)try{URL.revokeObjectURL(url)}catch(e){}if(next)next();else fin(null)};im.src=url}
- function viaReader(){var r=new FileReader();r.onload=function(){viaImg(r.result,false,function(){fin(null)})};r.onerror=function(){why='reader';fin(null)};try{r.readAsDataURL(f)}catch(e){why='reader-throw';fin(null)}}
- try{viaImg(URL.createObjectURL(f),true,viaReader)}catch(e){why='objurl';viaReader()}
- setTimeout(function(){why=why||'timeout';fin(null)},25000)})}
+ var fin=false;function end(v){if(!fin){fin=true;ok(v)}}
+ function draw(src,w,h){var s=Math.min(1,1080/Math.max(w,h)),c=document.createElement('canvas');c.width=Math.round(w*s);c.height=Math.round(h*s);c.getContext('2d').drawImage(src,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.75)}
+ function viaReader(){var r=new FileReader();r.onerror=function(){dbg.push(f.name+': ফাইল পড়া যায়নি');end(null)};
+  r.onload=function(){var im=new Image();im.onload=function(){try{end(draw(im,im.width,im.height))}catch(e){dbg.push('resize এরর: '+e.message);end(r.result)}};
+   im.onerror=function(){dbg.push(f.name+': ছবি ডিকোড হয়নি (type '+f.type+')');end(null)};im.src=r.result};r.readAsDataURL(f)}
+ var tm=setTimeout(function(){dbg.push('createImageBitmap দেরি, অন্য পথে');viaReader()},5000);
+ if(window.createImageBitmap)createImageBitmap(f).then(function(b){clearTimeout(tm);if(fin)return;try{var d=draw(b,b.width,b.height);if(b.close)b.close();end(d)}catch(e){dbg.push('bitmap এরর: '+e.message);viaReader()}}).catch(function(e){clearTimeout(tm);if(!fin)viaReader()});
+ else{clearTimeout(tm);viaReader()}
+ setTimeout(function(){if(!fin){dbg.push(f.name+': ৩০ সেকেন্ডেও হয়নি');end(null)}},30000)})}
 function pickImg(fl){
- var a=Array.prototype.slice.call(fl||[]).slice(0,10),bad=0;if(!a.length){toast('কোনো ছবি পাওয়া যায়নি');return}
+ var a=Array.prototype.slice.call(fl||[]).slice(0,10),bad=0;dbg=[];
+ if(!a.length){toast('কোনো ফাইল পাওয়া যায়নি');return}
  $('imgname').textContent='ছবি প্রসেস হচ্ছে... ('+a.length+'টি)';
  a.reduce(function(p,f){return p.then(function(){return sm(f)}).then(function(d){if(d){if(imgData.length<10){imgData.push(d);showPrev()}}else bad++})},Promise.resolve())
- .then(function(){showPrev();$('img').value='';if(bad)toast(bad+'টি ছবি পড়া যায়নি ['+(window.lastImgErr||'?')+']')})}
+ .then(function(){showPrev();$('img').value='';if(bad)alert(bad+'টি ছবি লোড হয়নি।\n'+dbg.join('\n'))})}
 function showPrev(){var p=$('prev');p.innerHTML='';imgData.forEach(function(d,i){var w=document.createElement('span');w.className='pv';w.innerHTML='<img src="'+d+'"><b onclick="rmImg('+i+')">✕</b>';p.appendChild(w)});
  $('imgname').textContent=imgData.length?'📷 '+imgData.length+'টি ছবি (সর্বোচ্চ ১০টি)':'';}
 function rmImg(i){imgData.splice(i,1);showPrev()}
@@ -149,10 +180,10 @@ function savePost(){
  if(x){x.text=t;x.when=w}else{x={id:Date.now(),t:Date.now(),text:t,when:w,status:'draft'};posts.push(x)}
  x.n=imgData.length;delete x.err;
  if(!st('posts',posts))return null;
- iput(x.id,imgData);clearEditor();render();toast('সেভ হয়েছে');return x}
+ iput(x.id,imgData);clearEditor();render();tab('list');toast('সেভ হয়েছে');return x}
 function saveSched(){var im=imgData.slice(),x=savePost();if(x)fbSend(x,true,false,im)}
 function clearEditor(){editId=null;imgData=[];$('text').value='';$('when').value='';showPrev();$('etitle').textContent='নতুন পোস্ট'}
-function editPost(id,a){var x=byId(id);editId=id;$('text').value=x.text;$('when').value=x.when?loc(x.when):'';$('etitle').textContent='পোস্ট এডিট';window.scrollTo(0,0);
+function editPost(id,a){tab('new');var x=byId(id);editId=id;$('text').value=x.text;$('when').value=x.when?loc(x.when):'';$('etitle').textContent='পোস্ট এডিট';window.scrollTo(0,0);
  (a?Promise.resolve(a):x.n?iget(id):Promise.resolve([])).then(function(r){imgData=r.slice();showPrev()})}
 function dupPost(id){var x=byId(id);(x.n?iget(id):Promise.resolve([])).then(function(a){
  var y={id:Date.now(),t:Date.now(),text:x.text,when:0,status:'draft',n:a.length};posts.push(y);st('posts',posts);iput(y.id,a);render();editPost(y.id,a);toast('কপি হয়েছে — এডিট করে নতুন সময় দিয়ে শিডিউল করুন')})}
@@ -190,17 +221,30 @@ function bulk(){
  var b=$('bbtn'),ok=0;b.disabled=true;toast('শিডিউল হচ্ছে... অ্যাপ বন্ধ করবেন না');
  go.reduce(function(p,x,i){return p.then(function(){toast('শিডিউল হচ্ছে '+(i+1)+'/'+go.length);return fbSend(x,true,true)}).then(function(r){if(r)ok++})},Promise.resolve()).then(function(){
   b.disabled=false;st('posts',posts);render();alert(ok+'টি শিডিউল হয়েছে'+(ok<go.length?'\n'+(go.length-ok)+'টি হয়নি — ওই পোস্টের নিচে লাল এরর দেখুন':''))})}
+function importNote(){
+ var t=$('paste').value,n=0,m;
+ if(m=t.match(/\b\d{14,17}\b/)){$('appid').value=m[0];n++}
+ if(m=t.match(/\b[a-f0-9]{32}\b/)){$('secret').value=m[0];n++}
+ var tk=t.match(/\bEA[A-Za-z0-9]{50,}\b/);if(tk){$('utoken').value=tk[0];n++}
+ if(m=t.match(/\bsk-ant-[\w-]{20,}/)){$('aikey').value=m[0];$('aiprov').value='claude';n++}
+ else if(m=t.match(/\bAIza[\w-]{30,}|\bAQ\.[\w.-]{20,}/)){$('aikey').value=m[0];$('aiprov').value='gemini';n++}
+ if(!n){toast('নোটে কিছু খুঁজে পাইনি');return}
+ saveCfg();$('paste').value='';toast(n+'টি জিনিস বসানো হয়েছে'+(tk?', পেজ লোড হচ্ছে...':''));
+ if(tk&&cfg.appId)loadPages()}
 function loadPages(){
  saveCfg();var tk=cfg.utoken;if(!tk){toast('টোকেন দিন');return}
- var p=Promise.resolve(tk);
- if(cfg.appId&&cfg.secret)p=fetch(G+'/oauth/access_token?grant_type=fb_exchange_token&client_id='+enc(cfg.appId)+'&client_secret='+enc(cfg.secret)+'&fb_exchange_token='+enc(tk))
-  .then(function(r){return r.json()}).then(function(j){if(j.access_token){tk=cfg.utoken=j.access_token;st('cfg',cfg);$('utoken').value=tk}return tk});
- p.then(function(t){return fetch(G+'/me/accounts?fields=name,access_token&limit=100&access_token='+enc(t))})
- .then(function(r){return r.json()}).then(function(j){
-  if(j.error){toast('এরর: '+j.error.message);return}
+ var er=function(j){return j.error.message+' (code '+j.error.code+(j.error.error_subcode?'/'+j.error.error_subcode:'')+')'};
+ var jn=function(r){return r.json()},exErr='',use=tk;
+ var p=Promise.resolve();
+ if(cfg.appId&&cfg.secret)p=fetch(G+'/oauth/access_token?grant_type=fb_exchange_token&client_id='+enc(cfg.appId)+'&client_secret='+enc(cfg.secret)+'&fb_exchange_token='+enc(tk)).then(jn)
+  .then(function(j){if(j.access_token){use=cfg.utoken=j.access_token;st('cfg',cfg);$('utoken').value=use}else exErr=j.error?er(j):'অজানা'}).catch(function(e){exErr=e.message});
+ p.then(function(){return fetch(G+'/me/accounts?fields=name,access_token&limit=100&access_token='+enc(use)).then(jn)}).then(function(j){
+  if(j.error){alert('পেজ লোড হয়নি।\n\nপেজ লিস্ট এরর: '+er(j)+(exErr?'\n\nটোকেন লম্বা করার এরর: '+exErr:''));return}
   pages=(j.data||[]).map(function(p){return{id:p.id,name:p.name,token:p.access_token}});
-  st('pages',pages);render();toast(pages.length+'টি পেজ পাওয়া গেছে')})
- .catch(function(){toast('নেটওয়ার্ক এরর')})}
+  st('pages',pages);render();
+  toast(pages.length+'টি পেজ পাওয়া গেছে'+(exErr?' (টোকেন লম্বা করা যায়নি: '+exErr+')':''))
+  if(!pages.length)alert('টোকেন ঠিক আছে কিন্তু কোনো পেজ পাওয়া যায়নি। টোকেন বানানোর সময় পেজ টিক দিয়েছিলেন কি না দেখুন।')})
+ .catch(function(e){alert('নেটওয়ার্ক এরর: '+e.message)})}
 function fbLogin(){saveCfg();if(!cfg.appId){toast('আগে Facebook App ID দিন');return}
  if(window.Android)Android.fbLogin(cfg.appId);else toast('শুধু অ্যাপে চলবে')}
 function openFb(){if(window.Android)Android.openFb();else window.open('https://m.facebook.com')}
@@ -225,7 +269,7 @@ function aiGen(){
   var a;try{a=JSON.parse(t.match(/\[[\s\S]*\]/)[0])}catch(e){a=t.split(/\n\s*\n/).filter(Boolean)}
   var base=new Date(s).getTime(),made=[];
   a.slice(0,n).forEach(function(tx,i){var x={id:Date.now()+i,t:Date.now()+i,text:String(tx).replace(/\*+/g,'').trim(),img:'',when:base+i*gap*36e5,status:'draft'};posts.push(x);made.push(x)});
-  st('posts',posts);render();
+  st('posts',posts);render();tab('list');
   if(!auto){b.disabled=false;toast(made.length+'টি ড্রাফট তৈরি হয়েছে');return}
   return made.reduce(function(p,x){return p.then(function(){return fbSend(x,true,true)})},Promise.resolve()).then(function(){b.disabled=false;toast('AI-র '+made.length+'টি পোস্ট ফেসবুকে শিডিউল হয়েছে ✅')})
  }).catch(function(e){b.disabled=false;toast('এরর: '+e.message)})}
@@ -241,6 +285,6 @@ function autoOn(){
  toast('চালু হয়েছে, প্রথম রান চলছে...');setTimeout(autoSt,8000);setTimeout(autoSt,20000)}
 function autoOff(){if(window.Android){Android.stopAuto();autoSt();toast('অটো পোস্ট বন্ধ')}}
 posts.forEach(function(x){if(x.img){iput(x.id,[x.img]);x.n=1;delete x.img}});st('posts',posts);
-fillCfg();render();autoSt();
+fillCfg();render();autoSt();tab(ls('tab','new'));
 if(cfg.utoken&&!pages.length)loadPages();
 </script></body></html>
